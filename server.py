@@ -32,7 +32,14 @@ while True:
 	connectionSocket.send(tempPass.encode())
 	
 	message = connectionSocket.recv(1024).decode()
-	print(message + ' has joined the chatroom.')
+	print(message + ' joined the chatroom')
+	sys.stdout.flush()
+	connectionSocket.send(str(args.port).encode())
+
+	clientMessage = connectionSocket.recv(1024).decode()
+	print(clientMessage)
+	sys.stdout.flush()
+	
 	connectionSocket.close()
 	#messages = connectionSocket.recv(1024).decode()
 	#if(messages == ":Exit"):

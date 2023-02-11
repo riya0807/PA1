@@ -18,6 +18,7 @@ import argparse
 # Use sys.stdout.flush() after print statemtents
 
 #Output​ (on new Client): Connected to <hostname> on port <port>
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-join', action='store_true')
 parser.add_argument('-host')
@@ -32,17 +33,24 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 clientSocket.connect((serverName, serverPort))
 
 #Receive the password from the server
+
 tempPass = clientSocket.recv(1024).decode()
 if (args.passcode == tempPass): #Validate the password
-	print('Connected to ' + args.host + ' on port ' + str(args.port)) #If validated, say connected to which host and port
-
 	userName = args.username
-	clientSocket.send(userName.encode()) 
+	clientSocket.send(userName.encode())
+
+	portNumber = clientSocket.recv(1024)
+	print('Connected to ' + args.host + ' on port ' + portNumber.decode()) #If validated, say connected to which host and port
+	sys.stdout.flush()
+	message = input(userName + ":")
+	clientSocket.send(message.encode())
 	clientSocket.close()
+
 	#message = input(userName + ": ")
 	#clientSocket.send(message.encode())
 else :
 	print("Incorrect passcode")
+	sys.stdout.flush()
 	clientSocket.close()
 	#userName = args.username
 	#clientSocket.send(userName.encode()) 
@@ -50,6 +58,7 @@ else :
 
 
 sys.stdout.flush()
+
 #clientSocket.close()
 #modifiedMessage = clientSocket.recv(1024)
 #print('From Server: ', modifiedMessage.decode())
