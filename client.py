@@ -42,9 +42,15 @@ if (args.passcode == tempPass): #Validate the password
 	portNumber = clientSocket.recv(1024)
 	print('Connected to ' + args.host + ' on port ' + portNumber.decode()) #If validated, say connected to which host and port
 	sys.stdout.flush()
-	message = input(userName + ":")
-	clientSocket.send(message.encode())
-	clientSocket.close()
+
+	message = input(userName + ": ")
+	while(message != None):
+		clientSocket.send(message.encode())
+		message = input(userName + ": ")
+		if (message == ":Exit"):
+			clientSocket.send(message.encode())
+			break
+	#clientSocket.close()
 
 	#message = input(userName + ": ")
 	#clientSocket.send(message.encode())
