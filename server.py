@@ -28,63 +28,67 @@ serverSocket.listen()
 
 def receiveMessages(name, socket):
 	
-	clientMessage = socket.recv(1024).decode()
-	while clientMessage != None:
-		if (clientMessage == ":Exit"):
+	message = "temp"#socket.recv(1024).decode()
+	while message != None:
+		message = socket.recv(1024).decode()
+		if (message == ":Exit"):
+			message = name + " left the chatroom"
+			for sock in sockets:
+				sock.send(message.encode())
+			sockets.remove(socket)
 			socket.close()
-			print(name + " left the chatroom")
+			message = name + " left the chatroom"
+			print(message)
 			sys.stdout.flush()
-			return
-		elif (clientMessage == ":)"):
-			print(name + ": [feeling happy]")
-			sys.stdout.flush()
-		elif (clientMessage == ":("):
-			print(name + ": [feeling sad]")
-			sys.stdout.flush()
-		elif (clientMessage == ":mytime"):
+			break
+			
+		elif (message == ":)"):
+			message = name + ": [feeling happy]"
+			
+		elif (message == ":("):
+			message = name + ": [feeling sad]"
+		elif (message == ":mytime"):
 			currentTime = datetime.now().strftime("%a %b %d %H:%M:%S %Y")
-			print(name + ": " + currentTime)
-			sys.stdout.flush()
-		elif (clientMessage == ":+1hr"):
+			message = name + ": " + currentTime
+		elif (message == ":+1hr"):
 			currentTime = datetime.now().strftime("%a %b %d ")
 			currentHour = int(datetime.now().strftime("%H"))+1
 			currentTime2 = datetime.now().strftime(":%M:%S %Y")
-			print(name + ": " + currentTime + str(currentHour) + currentTime2)
-			sys.stdout.flush()
+			message = name + ": " + currentTime + str(currentHour) + currentTime2
 		else:
-			print(name + ': ' + clientMessage)
-			sys.stdout.flush()
-		clientMessage = socket.recv(1024).decode()
-	#sys.stdout.flush()
+			message = name + ': ' + message
 
+		print(message)
+		sys.stdout.flush()
+		for sock in sockets:
+			sock.send(message.encode())
 
-#print('The server is ready to receive')
+		sys.stdout.flush()
+	return
+
+sockets = []
 while True:
 	(connectionSocket, addr) = serverSocket.accept() 
+
 	tempPass = args.passcode
 	connectionSocket.send(tempPass.encode())
-	
+
+	sockets.append(connectionSocket)
 	userName = connectionSocket.recv(1024).decode()
-	print(userName + ' joined the chatroom')
+
+	connectionSocket.send(str(args.port).encode())
+
+	message = userName + ' joined the chatroom'
+	print(message)
+	sys.stdout.flush()
+	for sock in sockets:
+		sock.send(message.encode())
+
+	
 	sys.stdout.flush()
 	x = Thread(target = receiveMessages, args=(userName, connectionSocket, ))
 	x.start()
 
-	connectionSocket.send(str(args.port).encode())
-
-	# clientMessage = connectionSocket.recv(1024).decode()
-
-	# print(clientMessage)
-	# sys.stdout.flush()
-	
-	#connectionSocket.close()
-	#messages = connectionSocket.recv(1024).decode()
-	#if(messages == ":Exit"):
-		#connectionSocket.close()
-		#print(message + " left the chatroom")
-	#else:
-		#print(message + ": " + messages)
-	
 
 
 if __name__ == "__main__":
