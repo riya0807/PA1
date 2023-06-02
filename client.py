@@ -3,9 +3,6 @@ from threading import *
 import sys
 import argparse
 
-
-
-
 #Command​: python3 client.py -join -host <hostname> -port <port> -username <username> -passcode <passcode>
 #Output​ (on Server): <username> joined the chatroom
 
@@ -33,42 +30,58 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 clientSocket.connect((serverName, serverPort))
 
 #Receive the password from the server
+def sendMessage():
+	message = input()
+	while True:
+		clientSocket.send(message.encode())
+		message = input()
+		if (message == ":Exit"):
+			clientSocket.send(message.encode())
+			break
+	clientSocket.close()
+	return
+
+def recvMessage(userName):
+	while True:
+		message = clientSocket.recv(1024).decode()
+		sys.stdout.flush()
+		if message.split(':')[0] == userName:
+			pass
+		elif message == userName + ' left the chatroom':
+			return
+		elif message == userName + ' joined the chatroom':
+			pass
+		else:
+			print(message)
+			sys.stdout.flush()
+	return
+
+
 
 tempPass = clientSocket.recv(1024).decode()
 if (args.passcode == tempPass): #Validate the password
 	userName = args.username
+	#portNumber = clientSocket.recv(1024)
 	clientSocket.send(userName.encode())
 
 	portNumber = clientSocket.recv(1024)
-	print('Connected to ' + args.host + ' on port ' + portNumber.decode()) #If validated, say connected to which host and port
+	print('Connected to ' + args.host + ' on port ' + str(args.port)) #If validated, say connected to which host and port
 	sys.stdout.flush()
 
-	message = input(userName + ": ")
-	while(message != None):
-		clientSocket.send(message.encode())
-		message = input(userName + ": ")
-		if (message == ":Exit"):
-			clientSocket.send(message.encode())
-			break
-	#clientSocket.close()
+	send = Thread(target=sendMessage)
+	send.start()
 
-	#message = input(userName + ": ")
-	#clientSocket.send(message.encode())
+	recv = Thread(target = recvMessage, args = (userName,))
+	recv.start()
 else :
 	print("Incorrect passcode")
 	sys.stdout.flush()
 	clientSocket.close()
-	#userName = args.username
-	#clientSocket.send(userName.encode()) 
 	
 
 
 sys.stdout.flush()
 
-#clientSocket.close()
-#modifiedMessage = clientSocket.recv(1024)
-#print('From Server: ', modifiedMessage.decode())
-#clientSocket.send(message.encode())
 
 if __name__ == "__main__":
 	pass
