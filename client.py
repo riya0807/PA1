@@ -61,7 +61,6 @@ def recvMessage(userName):
 tempPass = clientSocket.recv(1024).decode()
 if (args.passcode == tempPass): #Validate the password
 	userName = args.username
-	#portNumber = clientSocket.recv(1024)
 	clientSocket.send(userName.encode())
 
 	portNumber = clientSocket.recv(1024)
